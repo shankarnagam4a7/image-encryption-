@@ -111,8 +111,8 @@ public class imageEncryption {
     }
 
     public static void main(String[] args) throws IOException {
-        int[][] inputImageArray = referenceImage("src/input1.jpg");
-        int[][] referenceImageArray = referenceImage("src/input3.jpg");
+        int[][] inputImageArray = referenceImage("input1.jpg");
+        int[][] referenceImageArray = referenceImage("input3.jpg");
         if (inputImageArray.length == referenceImageArray.length || inputImageArray[0].length == referenceImageArray[0].length) {
 //            System.out.println("Error: Images are not the same size");
 //            System.out.println("Input Image Width: " + inputImageArray.length + " Input Image Height: " + inputImageArray[0].length);
@@ -127,8 +127,8 @@ public class imageEncryption {
 
             }
         }
-        writeToFile(encryptedImageArray, "src/encrypted.txt");
-        File oFile = new File("src/encrypted.png");
+        writeToFile(encryptedImageArray, "encrypted.txt");
+        File oFile = new File("encrypted.png");
         ImageIO.write(encryptedImage, "png", oFile);
     }
 }
