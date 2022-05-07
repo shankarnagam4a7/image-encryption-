@@ -8,7 +8,6 @@ public class imageEncryption {
     private static int[][] referenceImage(String path) throws IOException {
         return getInts(path);
     }
-
     private static int[][] getInts(String path) throws IOException {
         File iFile = new File(path);
         System.out.println("File: " + iFile.getName());
@@ -43,6 +42,15 @@ public class imageEncryption {
         return shiftedRowMatrix;
     }
 
+
+    private static int[][] shiftColumnRowMatrix(int[][] matrix, int shift) {
+        int[][] shiftedMatrix = shiftColumnMatrix(matrix, shift);
+        shiftedMatrix = shiftRowMatrix(shiftedMatrix, shift);
+        return shiftedMatrix;
+    }
+
+
+
     private static int[][] differenceMatrix(int[][] matrix1, int[][] matrix2) {
         int[][] differenceMatrix = new int[matrix2.length][matrix2[0].length];
         for (int i = 0; i < matrix2.length; i++) {
@@ -73,7 +81,6 @@ public class imageEncryption {
         }
         return redPixels;
     }
-
 
     private static int[][] getBluePixels(int[][] matrix) {
         int[][] bluePixels = new int[matrix.length][matrix[0].length];
@@ -110,15 +117,48 @@ public class imageEncryption {
         return alphaPixels;
     }
 
+    private static int[][] XORing(int[][] matrix1, int[][] matrix2) {
+        int[][] XORedMatrix = new int[matrix1.length][matrix1[0].length];
+        for (int i = 0; i < matrix1.length; i++) {
+            for (int j = 0; j < matrix1[0].length; j++) {
+                XORedMatrix[i][j] = matrix1[i][j] ^ matrix2[i][j];
+            }
+        }
+        return XORedMatrix;
+    }
+
+    private static int[][] addingWithNumber(int[][] matrix, int number) {
+        int[][] addedMatrix = new int[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                addedMatrix[i][j] = matrix[i][j] + number;
+            }
+        }
+        return addedMatrix;
+    }
+
+    private static int[][] subtractingWithNumber(int[][] matrix, int number) {
+        int[][] subtractedMatrix = new int[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                subtractedMatrix[i][j] = matrix[i][j] - number;
+            }
+        }
+        return subtractedMatrix;
+    }
+
+
     public static void main(String[] args) throws IOException {
         int[][] inputImageArray = referenceImage("input1.jpg");
+        System.out.println("Input image uploaded");
         int[][] referenceImageArray = referenceImage("input3.jpg");
+        System.out.println("Reference image uploaded");
         if (inputImageArray.length == referenceImageArray.length || inputImageArray[0].length == referenceImageArray[0].length) {
 //            System.out.println("Error: Images are not the same size");
 //            System.out.println("Input Image Width: " + inputImageArray.length + " Input Image Height: " + inputImageArray[0].length);
 //            System.out.println("Reference Image Width: " + referenceImageArray.length + " Reference Image Height: " + referenceImageArray[0].length);
         }
-        System.out.println("Hello World!");
+//        System.out.println("Hello World!");
         int[][] encryptedImageArray = differenceMatrix( referenceImageArray, inputImageArray);
         BufferedImage encryptedImage = new BufferedImage(inputImageArray.length, inputImageArray[0].length, BufferedImage.TYPE_INT_RGB);
         for (int i = 0; i < inputImageArray.length; i++) {
@@ -127,9 +167,12 @@ public class imageEncryption {
 
             }
         }
+
         writeToFile(encryptedImageArray, "encrypted.txt");
+        System.out.println("Encrypted image created");
         File oFile = new File("encrypted.png");
         ImageIO.write(encryptedImage, "png", oFile);
+        System.out.println("Encrypted image saved");
     }
 }
 
