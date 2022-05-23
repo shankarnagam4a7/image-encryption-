@@ -11,13 +11,21 @@ import java.util.ArrayList;
 import javax.crypto.Cipher;
 
 
+/**
+ * <h1>AES Encryption</h1>
+ * This class is used to encrypt and decrypt images using AES.
+ * The encryption and decryption is done using the AES algorithm.
+ * The key is used to encrypt and decrypt the image.
+ *
+ */
+
 public class aesEncryption {
 
     public static void main(String[] args) {
         aesEncryption aes = new aesEncryption();
         long startTime = System.nanoTime();
         // Get input file
-        File inputFile = new File("output/raw.txt");
+        File inputFile = new File("output/pixels.txt");
         // Get output file
         File encryptedFile = new File("output/text.png");
         // Get text file to decrypt
@@ -25,7 +33,7 @@ public class aesEncryption {
         try {
             System.out.println("Processing the image...");
             // Upload the image
-            BufferedImage image = ImageIO.read(new File("input/input1.jpg"));
+            BufferedImage image = ImageIO.read(new File("input/iImage.jpg"));
             System.out.println("Image uploaded");
             // Get image width and height
             int width = image.getWidth();
@@ -40,7 +48,7 @@ public class aesEncryption {
             pgb.grabPixels();
 
             // Write pixels to CSV file
-            aes.writeTextFile("./output/raw.txt", pixels, width);
+            aes.writeTextFile("./output/pixels.txt", pixels, width);
 
             // fileProcessor is used to encrypt and decrypt the image data based on the Cipher Mode
             aes.fileProcessor(Cipher.ENCRYPT_MODE,"1234567890123456",inputFile,encryptedFile);
@@ -68,8 +76,17 @@ public class aesEncryption {
     }
 
 
+    /**
+     * This method is used to encrypt and decrypt the image data based on the Cipher Mode
+     * @param path - path of the image
+     * @param data - data to be encrypted or decrypted
+     * @param width - width of the image
+     * @details - This method is used to write the image data to a file and read the data from the file
+     * @return - does not return anything but it writes the data to a file
+     */
+
     // Write pixels to CSV file and save it
-    private void writeTextFile(String path, int[] data, int width) throws IOException {
+    protected void writeTextFile(String path, int[] data, int width) throws IOException {
         try {
             // Create a new file with the given path
             FileWriter f = new FileWriter(path);
@@ -90,8 +107,17 @@ public class aesEncryption {
 
     }
 
+    /**
+     * This method is used to read the image data from a file
+     * @param path - path of the image
+     * @param width - width of the image
+     * @param height - height of the image
+     * @details - This method is used to read the image data from a file
+     * @return - returns the image data
+     */
+
     // Read pixels from CSV file and store in 'pixels' variable
-    private int[] readTextFile(String path, int width, int height) throws IOException {
+    protected int[] readTextFile(String path, int width, int height) throws IOException {
         System.out.println("Processing text file...");
         // Create a new file with the given path
         BufferedReader csv = new BufferedReader(new FileReader(path));
@@ -108,8 +134,17 @@ public class aesEncryption {
         return data;
     }
 
+    /**
+     * This method is used to convert the image data to an image
+     * @param cipherMode - cipher mode used to encrypt or decrypt the image data (AES)
+     * @param key - key used to encrypt or decrypt the image data (AES)
+     * @param inputFile - path of the image
+     * @param outputFile - path of the image
+     *
+     */
+
     // fileProcessor takes in the Cipher Mode, the key and the input file and encrypted file to encrypt or decrypt the image
-    private  void fileProcessor(int cipherMode,String key,File inputFile,File outputFile){
+    protected  void fileProcessor(int cipherMode,String key,File inputFile,File outputFile){
         try {
             // Create a new cipher with the given key and cipher mode
             // The key is used to encrypt or decrypt the image
@@ -140,7 +175,7 @@ public class aesEncryption {
 
 
     // parseCSV takes in a BufferedReader and returns an array of strings
-    private  String[] parseCSV(BufferedReader csv) throws IOException {
+    protected  String[] parseCSV(BufferedReader csv) throws IOException {
 
         ArrayList<String> fileData = new ArrayList<>();
         String row;
@@ -158,8 +193,17 @@ public class aesEncryption {
 
 
     // textToImage takes in the path to the text file and the width and height of the image to be created and creates an image
-
-    private  void textToImage(String path, int width, int height, int[] data) throws IOException {
+    /**
+     * This method is used to convert the text file to an image
+     * @param path - path of the text file
+     * @param width - width of the image
+     * @param height - height of the image
+     * @param data - array of pixels
+     * @throws IOException - exception thrown if the file is not found
+     * @throws FileNotFoundException - exception thrown if the file is not found
+     *
+     */
+    protected  void textToImage(String path, int width, int height, int[] data) throws IOException {
         // MemoryImageSource takes in an array of pixels and the width and height of the image to be created
         MemoryImageSource mis = new MemoryImageSource(width, height, data, 0, width);
         // Creates a new image with the given MemoryImageSource
@@ -170,6 +214,6 @@ public class aesEncryption {
         bufferedImage.getGraphics().drawImage(im, 0, 0, null);
         // Writes the BufferedImage to the given path
         ImageIO.write(bufferedImage, "jpg", new File(path));
-        System.out.println("Done! Check the result");
+        System.out.println("Done! Checkout the result");
     }
 }
