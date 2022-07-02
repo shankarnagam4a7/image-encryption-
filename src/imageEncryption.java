@@ -1,5 +1,7 @@
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigInteger;
+import java.util.Scanner;
 import javax.imageio.ImageIO;
 
 
@@ -33,7 +35,7 @@ public class imageEncryption {
             System.out.println("Width: " + iImage.getWidth() + " Height: " + iImage.getHeight());
             for (int i = 0; i < iImage.getWidth(); i++) {
                 for (int j = 0; j < iImage.getHeight(); j++) {
-                    iArray[i][j] =  iImage.getRGB(i, j);
+                    iArray[i][j] = (-1)*  iImage.getRGB(i, j);
                 }
             }
             return iArray;
@@ -86,8 +88,8 @@ public class imageEncryption {
      */
 
     // Shifts the columns of the given matrix by the given amount of columns
-    private int[][] shiftColumnMatrix(int[][] matrix, int shift) {
-        int[][] shiftedColumnMatrix = new int[matrix.length][matrix[0].length];
+    private BigInteger[][] shiftColumnMatrix(BigInteger[][] matrix, int shift) {
+        BigInteger[][] shiftedColumnMatrix = new BigInteger[matrix.length][matrix[0].length];
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
                 shiftedColumnMatrix[i][j] = matrix[i][(j + shift) % matrix[0].length];
@@ -104,8 +106,8 @@ public class imageEncryption {
      */
 
     // Shifts the rows of the given matrix by the given amount of rows
-    private int[][] shiftRowMatrix(int[][] matrix, int shift) {
-        int[][] shiftedRowMatrix = new int[matrix.length][matrix[0].length];
+    private BigInteger[][] shiftRowMatrix(BigInteger[][] matrix, int shift) {
+        BigInteger[][] shiftedRowMatrix = new BigInteger[matrix.length][matrix[0].length];
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
                 shiftedRowMatrix[i][j] = matrix[(i + shift) % matrix.length][j];
@@ -124,9 +126,14 @@ public class imageEncryption {
      */
 
     // Shifts the columns and rows of the given matrix by the given amount of rows and columns
-    private int[][] shiftColumnRowMatrix(int[][] matrix, int shift) {
-        int[][] shiftedMatrix = shiftColumnMatrix(matrix, shift);
+    private BigInteger[][] shiftColumnRowMatrix(BigInteger[][] matrix, int shift) {
+        BigInteger[][] shiftedMatrix = shiftColumnMatrix(matrix, shift);
         shiftedMatrix = shiftRowMatrix(shiftedMatrix, shift);
+        return shiftedMatrix;
+    }
+    private BigInteger[][] recoverShiftColumnRowMatrix(BigInteger[][] matrix, int shift) {
+        BigInteger[][] shiftedMatrix = shiftRowMatrix(matrix, shift);
+        shiftedMatrix = shiftColumnMatrix(shiftedMatrix, shift);
         return shiftedMatrix;
     }
 
@@ -139,7 +146,7 @@ public class imageEncryption {
      */
 
     // Writes the given matrix to the given path
-    private void writeToFile(int[][] matrix, String path) throws IOException {
+    private void writeToFile(BigInteger[][] matrix, String path) throws IOException {
         try {
             FileWriter writer = new FileWriter(path);
             for (int i = 0; i < matrix.length; i++) {
@@ -166,69 +173,24 @@ public class imageEncryption {
      */
 
     // Returns the given file as a matrix of integers
-    private int[][] fileToMatrix(String path) throws IOException {
-        try {
-            // Read the file
-            File iFile = new File(path);
-            System.out.println("File: " + iFile.getName());
-            // Create a buffered reader to read the file
-            BufferedReader reader = new BufferedReader(new FileReader(iFile));
-            // Create a string to store the file contents
-            String line = reader.readLine();
-            // Create a int array to store the file contents
-            int[][] iArray = new int[line.split(" ").length][line.split(" ").length];
-            int i = 0;
-            while (line != null) {
-                String[] lineArray = line.split(" ");
-                for (int j = 0; j < lineArray.length; j++) {
-                    iArray[i][j] = Integer.parseInt(lineArray[j]);
 
+
+        private BigInteger[][] fileToMatrix(String path, int length, int width) throws IOException {
+            File file = new File(path);
+            Scanner scanner = new Scanner(file);
+            BigInteger[][] array = new BigInteger[length][width];
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                String[] lineArray = line.split(",");
+                for (int i = 0; i < array.length; i++) {
+                    for (int j = 0; j < array[i].length; j++) {
+                        array[i][j] = new BigInteger(lineArray[j]);
+                    }
                 }
-                line = reader.readLine();
-                i++;
             }
-            reader.close();
-            return iArray;
+            return array;
         }
-        catch (IOException e) {
-            System.out.println("File not found!");
-            return null;
-        }
-    }
 
-    /**
-     * Returns 2-dimensional array matrix of integers by reading text file specified at given path
-     * @param path - The path to read the matrix from
-     * @return - The matrix as an int[][]
-     * @throws IOException - If the file cannot be read
-     * @details FileReader - Reads from a file
-     */
-    private int[][] fileToMatrixAtGivenPoint(String path) throws IOException {
-        try {
-            File iFile = new File(path);
-            System.out.println("File: " + iFile.getName());
-            BufferedReader reader = new BufferedReader(new FileReader(iFile));
-            String line = reader.readLine();
-            int[][] iArray = new int[line.split("|").length][line.split("|").length];
-            int i = 0;
-            while (line != null) {
-                String[] lineArray = line.split("|");
-                for (int j = 0; j < lineArray.length; j++) {
-                    iArray[i][j] = Integer.parseInt(lineArray[j]);
-
-                }
-
-                line = reader.readLine();
-                i++;
-            }
-            reader.close();
-            return iArray;
-        }
-        catch (Exception e) {
-            System.out.println("Error: " + e);
-            return null;
-        }
-    }
 
 
     /**
@@ -245,33 +207,18 @@ public class imageEncryption {
      */
 
     // xorMatrix takes two matrices and returns the xor of the two matrices
-    private int[][] xorMatrix(int[][] matrix1, int[][] matrix2) {
-        int[][] xorMatrix = new int[matrix1.length][matrix1[0].length];
+
+    private BigInteger[][] xorMatrix(BigInteger[][] matrix1, BigInteger[][] matrix2) {
+        BigInteger[][] xorMatrix = new BigInteger[matrix1.length][matrix1[0].length];
         for (int i = 0; i < matrix1.length; i++) {
             for (int j = 0; j < matrix1[0].length; j++) {
-                xorMatrix[i][j] = (matrix1[i][j] ^ matrix2[i][j]);
+                xorMatrix[i][j] = matrix1[i][j].xor(matrix2[i][j]);
             }
         }
         return xorMatrix;
     }
 
-    /**
-     * Finding the Average of the given matrix and returning the result
-     * @param matrix1 - The matrix to find the average of
-     * @param matrix2 - The matrix to find the average of
-     * @return - The average of the two matrices as an int
-     * @details Average of the two matrices is calculated as follows: (matrix1 + matrix2) / 2
-     */
 
-    private int[][] averageMatrix(int[][] matrix1, int[][] matrix2) {
-        int[][] averageMatrix = new int[matrix2.length][matrix2[0].length];
-        for (int i = 0; i < matrix2.length; i++) {
-            for (int j = 0; j < matrix2[0].length; j++) {
-                averageMatrix[i][j] = (matrix1[i][j] + matrix2[i][j]) / 2;
-            }
-        }
-        return averageMatrix;
-    }
 
     /**
      * Getting the value of Red Color each pixel in the given matrix
@@ -446,10 +393,8 @@ public class imageEncryption {
      * If the width and height of the matrix and the reference matrix are not the same, the matrix is not equalized.
      */
 
-
-
-    private  int[][] equalizeMatrix(int[][] matrix1, int[][] matrix2) {
-        int[][] equalMatrix = new int[matrix1.length][matrix1[0].length];
+    private  BigInteger[][] equalizeMatrix(BigInteger[][] matrix1, BigInteger[][] matrix2) {
+        BigInteger[][] equalMatrix = new BigInteger[matrix1.length][matrix1[0].length];
         if (matrix1.length > matrix2.length || matrix1[0].length > matrix2[0].length) {
             for (int i = 0; i < matrix2.length; i++) {
                 for (int j = 0; j < matrix2[0].length; j++) {
@@ -464,159 +409,244 @@ public class imageEncryption {
         return equalMatrix;
     }
 
-    /**
-     * Multiplies the input matrix with the reference matrix and returning the multiplied matrix
-     *
-     * @param iMatrix - The matrix to multiply
-     * @param rMatrix - The reference matrix
-     * @return - The multiplied matrix
-     * @details The matrix is multiplied as follows:
-     *  Formula: multipliedMatrix[i][j]= matrix1[i][k] * matrix2[k][j]
-     */
 
-    private  int[][] matrixMultiplication(int[][] iMatrix, int[][] rMatrix) {
-        int[][] multipliedMatrix = new int[iMatrix.length][iMatrix[0].length];
-        for (int i = 0; i < iMatrix.length; i++) {
-            for (int j = 0; j < iMatrix[0].length; j++) {
-                multipliedMatrix[i][j]=0;
-                for (int k = 0; k < iMatrix[0].length; k++) {
-                    multipliedMatrix[i][j] += iMatrix[i][k] * rMatrix[k][j];
-                }
-            }
-        }
-        return multipliedMatrix;
-    }
-
-
-    private  int[][] getBackMultipliedMatrix(int[][] matrix1, int[][] matrix2) {
-        int[][] multipliedMatrix = new int[matrix1.length][matrix1[0].length];
-        for (int i = 0; i < matrix1.length; i++) {
-            for (int j = 0; j < matrix1[0].length; j++) {
-                multipliedMatrix[i][j]=0;
-                for (int k = 0; k < matrix1[0].length; k++) {
-                            multipliedMatrix[i][j] += matrix1[i][k] / matrix2[j][k];
-                }
-
-            }
-
-        }
-        return multipliedMatrix;
-    }
-
-
-    private  float[][] logarithm(int[][] matrix) {
-        float[][] logarithmMatrix = new float[matrix.length][matrix[0].length];
+    protected BigInteger[][] intToBigInteger(int[][] matrix) {
+        BigInteger[][] bigIntegerMatrix = new BigInteger[matrix.length][matrix[0].length];
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
-                logarithmMatrix[i][j] = (float) Math.log(matrix[i][j]);
+                bigIntegerMatrix[i][j] = BigInteger.valueOf(matrix[i][j]);
             }
         }
-        return logarithmMatrix;
+        return bigIntegerMatrix;
     }
 
 
-    protected int[][] antiLogarithm(float[][] matrix) {
-        int[][] antiLogarithmMatrix = new int[matrix.length][matrix[0].length];
+
+
+
+
+    protected int[][] bigIntegerToInt(BigInteger[][] bigIntegerMatrix){
+        int[][] intMatrix = new int[bigIntegerMatrix.length][bigIntegerMatrix[0].length];
+        for (int i = 0; i < bigIntegerMatrix.length; i++) {
+            for (int j = 0; j < bigIntegerMatrix[0].length; j++) {
+                intMatrix[i][j] = bigIntegerMatrix[i][j].intValue();
+            }
+        }
+        return intMatrix;
+    }
+
+    protected void matrixToFile(int[][] matrix, String fileName) {
+        try {
+            FileWriter fw = new FileWriter(fileName);
+            for (int i = 0; i < matrix.length; i++) {
+                for (int j = 0; j < matrix[0].length; j++) {
+                    fw.write(matrix[i][j] + ",");
+                }
+                fw.write("\n");
+            }
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected BigInteger[][] rsaEncrypt(BigInteger[][] matrix, BigInteger e, BigInteger n) {
+        System.out.println("E in Encrypt: "+e);
+        System.out.println("n in Encrypt: "+n);
+        BigInteger[][] encryptedMatrix = new BigInteger[matrix.length][matrix[0].length];
         for (int i = 0; i < matrix.length; i++) {
             for (int j = 0; j < matrix[0].length; j++) {
-                antiLogarithmMatrix[i][j] = (int) Math.exp(matrix[i][j]);
+                encryptedMatrix[i][j] = matrix[i][j].modPow(e, n);;
             }
         }
-        return antiLogarithmMatrix;
+        return encryptedMatrix;
     }
+
+    protected BigInteger[][] rsaDecrypt(BigInteger[][] matrix, BigInteger d, BigInteger n) {
+
+        BigInteger[][] decryptedMatrix = new BigInteger[matrix.length][matrix[0].length];
+
+        System.out.println("d in Decrypt: "+d);
+        System.out.println("n in Decrypt: "+n);
+
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                decryptedMatrix[i][j] = (matrix[i][j].modPow(d, n));
+            }
+        }
+        return decryptedMatrix;
+    }
+
+
+
+    protected int[][] makeNegative(int[][] matrix) {
+        int[][] negativeMatrix = new int[matrix.length][matrix[0].length];
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[0].length; j++) {
+                negativeMatrix[i][j] = -matrix[i][j];
+            }
+        }
+        return negativeMatrix;
+    }
+
+    protected void writeMatirxToTextFile(int[][] matrix, String fileName) {
+        try {
+            FileWriter fw = new FileWriter(fileName);
+            for (int i = 0; i < matrix.length; i++) {
+                for (int j = 0; j < matrix[0].length; j++) {
+                    fw.write(matrix[i][j] + ",");
+                }
+                fw.write("\n");
+            }
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
 
 
     public static void main(String[] args) throws IOException {
         long startTime = System.nanoTime();
-        rsaEncryption rsa = new rsaEncryption();
-        aesEncryption aes = new aesEncryption();
+        Scanner sc = new Scanner(System.in);
+        BigInteger p = new BigInteger("867079");
+        BigInteger q = new BigInteger("712781");
+        BigInteger n = new BigInteger("618037436699");
+        BigInteger e = new BigInteger("907");
+        BigInteger d = new BigInteger("565567542643");
+        System.out.println("Int MAX Value"+Integer.MAX_VALUE);
+
+
         imageEncryption image = new imageEncryption();
 
-
-
-        int[][] inputImageArray1 = image.getImagePixelMatrix("input/iImage_1.jpg");
-//            System.out.println(inputImageArray1[0][0]);
-
-        System.out.println("Input image uploaded");
-        int[][] referenceImageArray1 =  image.getImagePixelMatrix("input/rImage.jpg");
-        System.out.println("Reference image uploaded");
-//         making the input image and reference image equal in length
-        int[][] inputImageArray = image.equalizeMatrix(inputImageArray1, referenceImageArray1);
-        int[][] referenceImageArray = image.equalizeMatrix(referenceImageArray1, inputImageArray1);
-        int[][] xorMatrix = image.xorMatrix(inputImageArray, referenceImageArray);
-        int[][] rsaEncryptedMatrix = rsa.rsaEncrypt(xorMatrix);
-        System.out.println("RSA Encryption done");
-        image.writeToFile(rsaEncryptedMatrix, "output/rsaEncrypted_1.png");
+        //Encrypting the input image using RSA Algorithm
+        int[][] inputImageMatrix = image.getImagePixelMatrix("./input/iImage_3.jpg");
+        int length = inputImageMatrix.length;
+        int width = inputImageMatrix[0].length;
+//        image.matrixToFile(inputImageMatrix, "./output/inputImageMatrix.txt");
+        BigInteger[][] inputImageMatrixBigInteger = image.intToBigInteger(inputImageMatrix);
+//        image.matrixToFile(inputImageMatrixBigInteger, "./output/inputImageMatrixBigInteger.txt");
+        BigInteger[][] encryptedImageMatrixBigInteger = image.rsaEncrypt(inputImageMatrixBigInteger, e, n);
 
 
 
 
-//        int[][] redMatrix = getRedPixels(inputImageArray);
-//        int[][] greenMatrix = getGreenPixels(inputImageArray);
-//        int[][] blueMatrix = getBluePixels(inputImageArray);
-//        int[][] alphaMatrix = getAlphaPixels(inputImageArray);
+        //Encrypting the reference image using RSA Algorithm
+        int[][] referenceImageMatrix = image.getImagePixelMatrix("./input/rImage_1.jpg");
+        int rLength = referenceImageMatrix.length;
+        int rWidth = referenceImageMatrix[0].length;
+        if (length > rLength || width > rWidth) {
+            System.out.println("Error: Input image is larger than reference image so selecting the reference image as the input image for encryption");
+            System.exit(0);
+        }
+//        image.matrixToFile(referenceImageMatrix, "./output/referenceImageMatrix.txt");
+        BigInteger[][] referenceImageMatrixBigInteger = image.intToBigInteger(referenceImageMatrix);
+//        image.matrixToFile(referenceImageMatrixBigInteger, "./output/referenceImageMatrixBigInteger.txt");
+        BigInteger[][] encryptedReferenceImageMatrixBigInteger = image.rsaEncrypt(referenceImageMatrixBigInteger, e, n);
+        BigInteger[][] xorMatrix = image.xorMatrix(encryptedImageMatrixBigInteger, encryptedReferenceImageMatrixBigInteger);
+        //Round 1
+        BigInteger[][] columnShiftedMatrix = image.shiftColumnMatrix(xorMatrix, (int)length/width);
+        BigInteger[][] rowShiftedMatrix = image.shiftRowMatrix(columnShiftedMatrix, (int)width/length);
+        BigInteger[][] multipliedMatrix = image.multiplyWithNumber(rowShiftedMatrix, (int)length/width);
+        //Round 2
+        BigInteger[][] colShiftedMatrix1 = image.shiftColumnMatrix(multipliedMatrix, (int)length/width + length%10);
+        BigInteger[][] rowShiftedMatrix1 = image.shiftRowMatrix(colShiftedMatrix1, (int)length/width + length%10);
+        BigInteger[][] multipliedMatrix1 = image.multiplyWithNumber(rowShiftedMatrix1, (int)length/width);
+        //Round 3
+        BigInteger[][] colShiftedMatrix2 = image.shiftColumnMatrix(multipliedMatrix1, (int)length/width + length%20);
+        BigInteger[][] rowShiftedMatrix2 = image.shiftRowMatrix(colShiftedMatrix2, (int)length/width + length%20);
+        BigInteger[][] multipliedMatrix2 = image.multiplyWithNumber(rowShiftedMatrix2, (int)length/width);
+        //Round 4
+        BigInteger[][] colShiftedMatrix3 = image.shiftColumnMatrix(multipliedMatrix2, (int)length/width + length%30);
+        BigInteger[][] rowShiftedMatrix3 = image.shiftRowMatrix(colShiftedMatrix3, (int)length/width + length%30);
+        BigInteger[][] multipliedMatrix3 = image.multiplyWithNumber(rowShiftedMatrix3, (int)length/width);
+
+
+
+
+
+            //Row deals with length and column deals with width
+        int[][] multipliedMatrixInt = image.bigIntegerToInt(multipliedMatrix3);
+
+        image.writeToFile(multipliedMatrix3, "./output/encrypted.txt");
+        System.out.println("Encrypted Image Matrix Saved to output/encrypted.txt");
+//        BigInteger[][] fileToMatrix = image.fileToMatrix("./output/encrypted.txt", length, width);
+
+//        fileToMatrix = image.fileToMatrix("./output/encrypted.txt", length, width);
+//        assert fileToMatrix != null;
+//        fileToMatrix = multipliedMatrix3;
+//        BigInteger[][] fileToMatrixBigInteger = image.intToBigInteger(fileToMatrix);
+
+
+//        System.out.println("Enter 1 to decrypt the image or 0 to exit");
+//        int exit = sc.nextInt();
+//        if (exit==0)
+//            System.exit(0);
+
+
+
+        //Decrypting the encrypted image using Hybrid Algorithm
+        //Inverse Round 1
+        BigInteger[][] recoverMultipliedMatrix3 = image.multiplyWithNumber(multipliedMatrix3, (int)length/width );
+        BigInteger[][] recoverRowShiftedMatrix3 = image.shiftRowMatrix(recoverMultipliedMatrix3, length - (int)length/width - length%30);
+        BigInteger[][] recoverColShiftedMatrix3 = image.shiftColumnMatrix(recoverRowShiftedMatrix3, width - (int)length/width - length%30);
+        //Inverse Round 2
+        BigInteger[][] recoverMultipliedMatrix2 = image.multiplyWithNumber(recoverColShiftedMatrix3, (int)length/width );
+        BigInteger[][] recoverRowShiftedMatrix2 = image.shiftRowMatrix(recoverMultipliedMatrix2, length - (int)length/width - length%20);
+        BigInteger[][] recoverColShiftedMatrix2 = image.shiftColumnMatrix(recoverRowShiftedMatrix2, width - (int)length/width - length%20);
+        //Inverse Round 3
+        BigInteger[][] recoverMultipliedMatrix1 = image.getBackMultipliedMatrix(recoverColShiftedMatrix2, (int)length/width);
+        BigInteger[][] recoverRowShiftedMatrix1 = image.shiftRowMatrix(recoverMultipliedMatrix1, length-(int)length/width - length%10);
+        BigInteger[][] recoverColShiftedMatrix1 = image.shiftColumnMatrix(recoverRowShiftedMatrix1, width-(int)length/width - length%10);
+        //Inverse Round 4
+        BigInteger[][] recoverMultipliedMatrix = image.getBackMultipliedMatrix(recoverColShiftedMatrix1, (int)length/width);
+        BigInteger[][] recoverRowShiftedMatrix = image.shiftRowMatrix(recoverMultipliedMatrix, length-(int)(width/length));
+        BigInteger[][] recoverColumnShiftedMatrix = image.shiftColumnMatrix(recoverRowShiftedMatrix, width-(int)(length/length));
+
 //
-//        int[][] redMatrix1 = getRedPixels(referenceImageArray);
-//        int[][] greenMatrix1 = getGreenPixels(referenceImageArray);
-//        int[][] blueMatrix1 = getBluePixels(referenceImageArray);
-//        int[][] alphaMatrix1 = getAlphaPixels(referenceImageArray);
-
-//        int[][] redDifferenceMatrix = getDifferenceMatrix(redMatrix, redMatrix1);
-//        int[][] greenDifferenceMatrix = getDifferenceMatrix(greenMatrix, greenMatrix1);
-//        int[][] blueDifferenceMatrix = getDifferenceMatrix(blueMatrix, blueMatrix1);
-//        int[][] alphaDifferenceMatrix = getDifferenceMatrix(alphaMatrix, alphaMatrix1);
-
-//        writeToFile(redDifferenceMatrix, "output/redDifferenceMatrix.txt");
-//        writeToFile(greenDifferenceMatrix, "output/greenDifferenceMatrix.txt");
-//        writeToFile(blueDifferenceMatrix, "output/blueDifferenceMatrix.txt");
-//        writeToFile(alphaDifferenceMatrix, "output/alphaDifferenceMatrix.txt");
-
-
-//        int[][] rsaEncryptedRedMatrix = rsa.rsaEncrypt(redDifferenceMatrix);
-//        int[][] rsaEncryptedGreenMatrix = rsa.rsaEncrypt(greenDifferenceMatrix);
-//        int[][] rsaEncryptedBlueMatrix = rsa.rsaEncrypt(blueDifferenceMatrix);
-//        int[][] rsaEncryptedAlphaMatrix = rsa.rsaEncrypt(alphaDifferenceMatrix);
-
-//        writeToFile(rsaEncryptedRedMatrix, "output/rsaEncryptedRedMatrix.txt");
-//        writeToFile(rsaEncryptedGreenMatrix, "output/rsaEncryptedGreenMatrix.txt");
-//        writeToFile(rsaEncryptedBlueMatrix, "output/rsaEncryptedBlueMatrix.txt");
-//        writeToFile(rsaEncryptedAlphaMatrix, "output/rsaEncryptedAlphaMatrix.txt");
 
 
 
-//        int[][] rsaDecryptedRedMatrix = rsa.rsaDecrypt(rsaEncryptedRedMatrix);
-//        int[][] rsaDecryptedGreenMatrix = rsa.rsaDecrypt(rsaEncryptedGreenMatrix);
-//        int[][] rsaDecryptedBlueMatrix = rsa.rsaDecrypt(rsaEncryptedBlueMatrix);
-//        int[][] rsaDecryptedAlphaMatrix = rsa.rsaDecrypt(rsaEncryptedAlphaMatrix);
-//            writeToFile(rsaDecryptedRedMatrix, "output/rsaDecryptedRedMatrix.txt");
-//            writeToFile(rsaDecryptedGreenMatrix, "output/rsaDecryptedGreenMatrix.txt");
-//            writeToFile(rsaDecryptedBlueMatrix, "output/rsaDecryptedBlueMatrix.txt");
-//            writeToFile(rsaDecryptedAlphaMatrix, "output/rsaDecryptedAlphaMatrix.txt");
+
+        BigInteger[][] recoverXorMatrix = image.xorMatrix(recoverColumnShiftedMatrix, encryptedReferenceImageMatrixBigInteger);
+
+        BigInteger[][] decryptedImageMatrixBigInteger = image.rsaDecrypt(recoverXorMatrix, d, n);
+        int[][] decryptedImageMatrix = image.bigIntegerToInt(decryptedImageMatrixBigInteger);
+        decryptedImageMatrix = image.makeNegative(decryptedImageMatrix);
+        image.writeImage(decryptedImageMatrix, "./output/decryptedImage.jpg");
 
 
+        image.matrixToFile(decryptedImageMatrix, "./output/decryptedImage.txt");
 
-//        int[][] xorDecryptedMatrix = xorMatrix(xorMatrix, referenceImageArray);
-
-
-        //Create image from the array
-//        BufferedImage encryptedImage = new BufferedImage(inputImageArray.length, inputImageArray[0].length, BufferedImage.TYPE_INT_RGB);
-//        for (int i = 0; i < inputImageArray.length; i++) {
-//            for (int j = 0; j < inputImageArray[0].length; j++) {
-//                encryptedImage.setRGB(i, j, xorDecryptedMatrix[i][j]);
-//
-//            }
-//        }
-
-//        writeToFile(xorDecryptedMatrix, "output/encrypted.txt");
         System.out.println("Encrypted image created");
         File oFile = new File("output/encrypted.png");
 //        ImageIO.write(encryptedImage, "png", oFile);
         System.out.println("Encrypted image saved");
         long stopTime = System.nanoTime();
-        long elapsedTime = stopTime - startTime;
-        System.out.println("Time taken is: "+ String.valueOf(elapsedTime) + " nanoseconds");
+//        long elapsedTime = stopTime - startTime;
+        System.out.println( "Time taken: " + (stopTime - startTime) / 1000000000.0 + " seconds");
     }
+
+    private BigInteger[][] multiplyWithNumber(BigInteger[][] addedMatrix, int i) {
+        BigInteger[][] multipliedMatrix = new BigInteger[addedMatrix.length][addedMatrix[0].length];
+        for (int j = 0; j < addedMatrix.length; j++) {
+            for (int k = 0; k < addedMatrix[0].length; k++) {
+                multipliedMatrix[j][k] = addedMatrix[j][k].multiply(BigInteger.valueOf(i));
+            }
+        }
+        return multipliedMatrix;
+    }
+
+    private BigInteger[][] getBackMultipliedMatrix(BigInteger[][] multipliedMatrix, int i) {
+        BigInteger[][] getBackMultipliedMatrix = new BigInteger[multipliedMatrix.length][multipliedMatrix[0].length];
+        for (int j = 0; j < multipliedMatrix.length; j++) {
+            for (int k = 0; k < multipliedMatrix[0].length; k++) {
+                getBackMultipliedMatrix[j][k] = multipliedMatrix[j][k].divide(BigInteger.valueOf(i));
+            }
+        }
+        return getBackMultipliedMatrix;
+    }
+
 }
-
-
-
