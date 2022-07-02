@@ -10,18 +10,18 @@ import java.util.Random;
 public class RSA
 {
     // P and Q are two large prime numbers
-    private BigInteger P;
-    private BigInteger Q;
+    protected BigInteger P;
+    protected BigInteger Q;
     // N is the product of P and Q
-    private BigInteger N;
+    protected BigInteger N;
     // Phi is the totient of N (Euler's totient function) i.e. Euler's phi function (P-1)*(Q-1)
-    private BigInteger PHI;
+    protected BigInteger PHI;
     // E is the prime number that is relatively prime to PHI
-    private BigInteger e;
+    protected BigInteger e;
     // D is the multiplicative inverse of E mod PHI (E*D mod PHI = 1) Private key
-    private BigInteger d;
+    protected BigInteger d ;
     // The length of the key in bits
-    private int maxLength = 15;
+    protected int maxLength = 20;
 
     private Random R;
 
@@ -64,6 +64,7 @@ public class RSA
         // d = E^-1 mod PHI
 
         d = e.modInverse(PHI);
+        System.out.println("Private key: " + d);
     }
 
     /**
@@ -74,10 +75,13 @@ public class RSA
      * @formula c = m<sup>e</sup> mod n
      * @return Encrypted message (c)
      */
-    private BigInteger rsaEncrypt(BigInteger m, BigInteger e, BigInteger n) {
+    protected BigInteger rsaEncrypt(BigInteger m, BigInteger e, BigInteger n) {
+//        System.out.println("e: " + e);
         // modPow is the same as m^e mod n
         return m.modPow(e, n);
     }
+
+
 
     /**
      * <h2>Decrypts a message using the private key.</h2>
@@ -87,24 +91,68 @@ public class RSA
      * @formula m = c<sup>d</sup>mod n
      * @return Decrypted message (m)
      */
-    private BigInteger rsaDecrypt(BigInteger c, BigInteger d, BigInteger n) {
+    protected BigInteger rsaDecrypt(BigInteger c, BigInteger d, BigInteger n) {
         //modPow is the same as c^d mod n
+
         return c.modPow(d, n);
     }
 
+    /**
+     * <h2>Encrypts a message using the public key.</h2>
+     * @param m
+     * @param e
+     * @param n
+     * @formula c = m<sup>e</sup> mod n
+     * @see #rsaEncrypt(BigInteger[][], BigInteger, BigInteger)
+     */
+    protected BigInteger[][] rsaEncrypt(BigInteger[][] m, BigInteger e, BigInteger n) {
+        BigInteger[][] c = new BigInteger[m.length][m[0].length];
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 0; j < m[0].length; j++) {
+                c[i][j] = rsaEncrypt(m[i][j], e, n);
+            }
+        }
 
-    public RSA(BigInteger p, BigInteger q, BigInteger e, BigInteger d, BigInteger N) {
+        return c;
+    }
+
+    /**
+     * <h2>Decrypts a message using the private key.</h2>
+     * @param c
+     * @param d
+     * @param n
+     * @formula m = c<sup>d</sup>mod n
+     * @see #rsaDecrypt(BigInteger[][], BigInteger, BigInteger)
+     */
+    protected BigInteger[][] rsaDecrypt(BigInteger[][] c, BigInteger d, BigInteger n) {
+        BigInteger[][] m = new BigInteger[c.length][c[0].length];
+        for (int i = 0; i < c.length; i++) {
+            for (int j = 0; j < c[0].length; j++) {
+                m[i][j] = rsaDecrypt(c[i][j], d, n);
+            }
+        }
+        return m;
+    }
+
+    public RSA(BigInteger p , BigInteger q, BigInteger e, BigInteger d) {
         this.P = p;
         this.Q = q;
         this.e = e;
         this.d = d;
-        this.N = N;
+        this.N = p.multiply(q);
+        this.PHI = P.subtract(BigInteger.ONE).multiply(Q.subtract(BigInteger.ONE));
+
 
     }
 
     public static void main (String [] arguments) throws IOException
     {
+        long startTime = System.nanoTime();
         RSA rsa = new RSA();
+        System.out.println("E: " + rsa.e);
+        System.out.println("D: " + rsa.d);
+        System.out.println("N: " + rsa.N);
+
         DataInputStream input = new DataInputStream(System.in);
         System.out.println("Enter message you wish to send.");
         String inputString = input.readLine();
@@ -115,5 +163,8 @@ public class RSA
 
         BigInteger decrypt = rsa.rsaDecrypt(encrypt, rsa.d, rsa.N);
         System.out.println("Decrypted message: " + decrypt);
+        long endTime = System.nanoTime();
+        System.out.println("Time taken: " + (endTime - startTime) + "nanoseconds");
+        //time in seconds = time in milliseconds / 1000
     }
 }
