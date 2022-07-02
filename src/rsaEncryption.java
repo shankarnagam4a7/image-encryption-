@@ -35,16 +35,16 @@ public class rsaEncryption {
 
     private int rsaEncrypt(int m) {
         int n = p * q;
-        System.out.println("public key: "+n);
+//        System.out.println("public key: "+n);
         long c = ((long) Math.pow(m, e))%n;
-        System.out.println("rsa Encrypt : "+c);
+//        System.out.println("rsa Encrypt : "+c);
         return (int) c;
     }
 
 
     protected int[][] rsaEncrypt(int[][] m) {
         int n = p * q;
-        System.out.println("public key: "+n);
+//        System.out.println("public key: "+n);
         int[][] c = new int[m.length][m[0].length];
         for (int i = 0; i < m.length; i++) {
             for (int j = 0; j < m[0].length; j++) {
@@ -86,7 +86,7 @@ public class rsaEncryption {
         long m = (long) Math.pow(c, d);
 //        System.out.println("m after Math.pow(): "+m);
         m = m % n;
-        System.out.println("RSA Decrypt: "+m);
+//        System.out.println("RSA Decrypt: "+m);
         return (int) (m);
     }
 
@@ -97,7 +97,7 @@ public class rsaEncryption {
      * @details find the private key using the formula
      * @details e is the prime number that is relatively prime to PHI
      * @details d is the private key
-     * @details formula for finding the private key:if(<b>phi(n)*i +1/e==0</b> ) then <b>d=i</b>
+     * @details formula for finding the private key:if(<b>phi(n)*i +1%e==0</b> ) then <b>d=i</b>
      */
     protected int findPrivate() {
         int phi = (p - 1) * (q - 1);
@@ -107,12 +107,12 @@ public class rsaEncryption {
             d+=1;
             d/=e;
             if(d%1==0){
-                System.out.println("Private Key: "+d);
+//                System.out.println("Private Key: "+d);
                 return d;
             }
 
         }
-        System.out.println("Private Key: "+d);
+//        System.out.println("Private Key: "+d);
         return d;
     }
 
@@ -120,8 +120,11 @@ public class rsaEncryption {
         long startTime = System.nanoTime();
         rsaEncryption rsa = new rsaEncryption();
         int pKey = rsa.findPrivate();
+        System.out.println("Private Key: "+pKey);
         int c = rsa.rsaEncrypt(26);
+        System.out.println("Encrypted Message: "+c);
         rsa.rsaDecrypt( pKey,c);
+        System.out.println("Decrypted Message: "+rsa.rsaDecrypt( pKey,c));
         long endTime = System.nanoTime();
         long duration = (endTime - startTime);
         System.out.println("=Time taken is: "+duration + " nanoseconds");

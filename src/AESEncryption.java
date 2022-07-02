@@ -214,6 +214,6 @@ public class aesEncryption {
         bufferedImage.getGraphics().drawImage(im, 0, 0, null);
         // Writes the BufferedImage to the given path
         ImageIO.write(bufferedImage, "jpg", new File(path));
-        System.out.println("Done! Checkout the result");
+        System.out.println("Done! Checkout the result in the image folder.");
     }
 }
