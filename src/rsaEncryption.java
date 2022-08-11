@@ -121,7 +121,7 @@ public class rsaEncryption {
         rsaEncryption rsa = new rsaEncryption();
         int pKey = rsa.findPrivate();
         System.out.println("Private Key: "+pKey);
-        int c = rsa.rsaEncrypt(26);
+        int c = rsa.rsaEncrypt(14);
         System.out.println("Encrypted Message: "+c);
         rsa.rsaDecrypt( pKey,c);
         System.out.println("Decrypted Message: "+rsa.rsaDecrypt( pKey,c));

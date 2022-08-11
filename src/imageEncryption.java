@@ -12,13 +12,6 @@ public class imageEncryption {
      * @return -  2-dimensional array of the image specified by the path
      * @throws IOException - Throws an IOException if the image at the given path cannot be read
      * @details BufferedImage.getRGB() returns an integer representing the color of the pixel at the given coordinates.
-     *@details The integer is in the form of 0xAARRGGBB.
-     *         The first 8 bits represent the alpha value, the next 8 bits represent the red value,
-     *         the next 8 bits represent the green value, and the last 8 bits represent the blue value.
-     *@details The alpha value is the transparency of the pixel.
-     *@details The red value is the amount of red in the pixel.
-     *@details The green value is the amount of green in the pixel.
-     *@details The blue value is the amount of blue in the pixel.
      */
 
 
@@ -359,16 +352,22 @@ public class imageEncryption {
         BigInteger d = new BigInteger("565567542643");
 
         imageEncryption image = new imageEncryption();
+/***
+ * <h1>Input Image</h1>
+ */
+
 
         //Encrypting the input image using RSA Algorithm
-        int[][] inputImageMatrix = image.getImagePixelMatrix("./input/iImage.jpg");
+        int[][] inputImageMatrix = image.getImagePixelMatrix("./input/iImage_1.jpg");
         int length = inputImageMatrix.length;
         int width = inputImageMatrix[0].length;
         BigInteger[][] inputImageMatrixBigInteger = image.intToBigInteger(inputImageMatrix);
         BigInteger[][] encryptedImageMatrixBigInteger = image.rsaEncrypt(inputImageMatrixBigInteger, e, n);
 
 
-
+        /***
+         * <h1>Reference Image</h1>
+         */
 
         //Encrypting the reference image using RSA Algorithm
         int[][] referenceImageMatrix = image.getImagePixelMatrix("./input/rImage.jpg");
@@ -407,8 +406,10 @@ public class imageEncryption {
 
         image.writeToFile(multipliedMatrix3, "./output/encrypted.txt");
         System.out.println("Encrypted Image Matrix Saved to output/encrypted.txt");
+
+
         BigInteger[][] fileToMatrix = image.fileToMatrix("./output/encrypted.txt", length, width);
-        image.writeToFile(fileToMatrix, "./output/encrypted_1.txt");
+//        image.writeToFile(fileToMatrix, "./output/encrypted_1.txt");
 
 
         //Decrypting the encrypted image using Hybrid Algorithm
@@ -438,7 +439,6 @@ public class imageEncryption {
         image.writeImage(decryptedImageMatrix, "./output/decryptedImage.jpg");
 
 
-        image.matrixToFile(decryptedImageMatrix, "./output/decryptedImage.txt");
 
         System.out.println("Encrypted image created");
         File oFile = new File("output/encrypted.png");
