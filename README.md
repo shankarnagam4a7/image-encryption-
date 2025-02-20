@@ -1,5 +1,5 @@
 # Image Encryption
- This project is done as a part of Mini-Project in my 6th Sem.
+ This project is done as a part of Mini-Project
 <br>
 Implementation of Image Encryption using Hybrid Algorithm (<bold>AES Algorithm</bold> and <bold>RSA Algorithm</bold>.
 <br>
